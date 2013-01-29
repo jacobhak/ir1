@@ -10,6 +10,8 @@
 
 package ir;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.HashMap;
 
@@ -49,9 +51,49 @@ public class HashedIndex implements Index {
      *  Searches the index for postings matching the query.
      */
     public PostingsList search( Query query, int queryType, int rankingType ) {
-        return index.get(query.terms.getFirst());
+        ArrayList<PostingsList> postingsLists = new ArrayList<PostingsList>();
+        for (String term : query.terms) postingsLists.add(index.get(term));
+        if (postingsLists.size() > 1) return intersection(postingsLists);
+        return postingsLists.get(0);
     }
 
+    private PostingsList intersection(ArrayList<PostingsList> postingsLists) {
+        PostingsList result = new PostingsList();
+        Iterator<PostingsList> iterator = postingsLists.iterator();
+        PostingsList p1 = iterator.next();
+        PostingsList p2 = iterator.next();
+        p1.sortByDocID();
+        p2.sortByDocID();
+        Iterator<PostingsEntry> itP1,itP2;
+        PostingsEntry pe1,pe2;
+        while (iterator.hasNext()){
+            if (result.size()>0) {
+                result.sortByDocID();
+                p1 = result;
+                result = new PostingsList();
+                System.out.println("Starting new intersection. Previous intersection size: "+p1.size());
+                p2 = iterator.next();
+                p2.sortByDocID();
+            }
+            itP1 = p1.iterator();
+            itP2 = p2.iterator();
+            pe1 = itP1.next();
+            pe2 = itP2.next();
+            while (itP1.hasNext() && itP2.hasNext()){
+                if (pe1.docID == pe2.docID) {
+                    System.out.println("Adding docID "+pe1.docID);
+                    result.add(pe1);
+                    pe1 = itP1.next();
+                    pe2 = itP2.next();
+                }
+                else if (pe1.docID < pe2.docID) pe1 = itP1.next();
+                else pe2 = itP2.next();
+            }
+
+        }
+        result.sortByDocID();
+        return result;
+    }
 
     /**
      *  No need for cleanup in a HashedIndex.

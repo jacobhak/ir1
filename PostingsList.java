@@ -8,6 +8,9 @@
 
 package ir;
 
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.io.Serializable;
 import ir.PostingsEntry;
@@ -36,8 +39,29 @@ public class PostingsList implements Serializable {
 	}
 
 	public void add(int docID, int offset) {
+        for (PostingsEntry pe : list){
+            if (pe.docID == docID) return;
+        }
 		PostingsEntry pe = new PostingsEntry(docID,offset);
 		list.add(pe);
-
 	}
+
+    public void add(PostingsEntry pe) {
+        list.add(pe);
+    }
+
+    public void sortByDocID() {
+        Collections.sort(list,new Comparator<PostingsEntry>() {
+            @Override
+            public int compare(PostingsEntry postingsEntry, PostingsEntry postingsEntry2) {
+                if (postingsEntry.docID<postingsEntry2.docID) return -1;
+                else if (postingsEntry.docID == postingsEntry2.docID) return 0;
+                else return 1;
+            }
+        });
+    }
+
+    public Iterator<PostingsEntry> iterator(){
+        return list.iterator();
+    }
 }
