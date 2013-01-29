@@ -10,30 +10,34 @@ package ir;
 
 import java.util.LinkedList;
 import java.io.Serializable;
+import ir.PostingsEntry;
 
 /**
  *   A list of postings for a given word.
  */
 public class PostingsList implements Serializable {
-    
-    /** The postings list as a linked list. */
-    private LinkedList<PostingsEntry> list = new LinkedList<PostingsEntry>();
 
-
-    /**  Number of postings in this list  */
-    public int size() {
-	return list.size();
-    }
-
-    /**  Returns the ith posting */
-    public PostingsEntry get( int i ) {
-	return list.get( i );
-    }
-
-    //
-    //  YOUR CODE HERE
-    //
-}
+	/** The postings list as a linked list. */
+	private LinkedList<PostingsEntry> list;
 	
+	public PostingsList() {
+		list = new LinkedList<PostingsEntry>();
+	}
 
-			   
+
+	/**  Number of postings in this list  */
+	public int size() {
+		return list.size();
+	}
+
+	/**  Returns the ith posting */
+	public PostingsEntry get( int i ) {
+		return list.get( i );
+	}
+
+	public void add(int docID, int offset) {
+		PostingsEntry pe = new PostingsEntry(docID,offset);
+		list.insert(pe);
+
+	}
+}

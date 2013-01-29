@@ -10,10 +10,13 @@ package ir;
 
 import java.io.Serializable;
 
+import com.sun.org.apache.xpath.internal.axes.SelfIteratorNoPredicate;
+
 public class PostingsEntry implements Comparable<PostingsEntry>, Serializable {
     
     public int docID;
     public double score;
+    public int offset;
 
     /**
      *  PostingsEntries are compared by their score (only relevant 
@@ -25,11 +28,16 @@ public class PostingsEntry implements Comparable<PostingsEntry>, Serializable {
     public int compareTo( PostingsEntry other ) {
 	return Double.compare( other.score, score );
     }
-
-    //
-    //  YOUR CODE HERE
-    //
-
+    
+    public PostingsEntry(int docID, double score, int offset) {
+    	this.docID = docID;
+    	this.score = score;
+    	this.offset = offset;
+	}
+    
+    public PostingsEntry(int docID, int offset) {
+    	PostingsEntry(docID,0,offset);
+	}
 }
 
     
