@@ -37,7 +37,7 @@ public class PostingsList implements Serializable {
 
 	public void add(int docID, int offset) {
 		PostingsEntry pe = new PostingsEntry(docID,offset);
-		list.insert(pe);
+		list.add(pe);
 
 	}
 }

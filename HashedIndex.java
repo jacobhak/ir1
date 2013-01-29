@@ -13,7 +13,6 @@ package ir;
 import java.util.LinkedList;
 import java.util.HashMap;
 
-
 /**
  *   Implements an inverted index as a Hashtable from words to PostingsLists.
  */
@@ -27,9 +26,13 @@ public class HashedIndex implements Index {
      *  Inserts this token in the index.
      */
     public void insert( String token, int docID, int offset ) {
-	//
-	//  YOUR CODE HERE
-	//
+    	PostingsList list = index.get(token);
+    	if (list == null) {
+    		list = new PostingsList();
+    	}
+    	list.add(docID,offset);
+        index.put(token, list);
+		
     }
 
 
@@ -38,10 +41,7 @@ public class HashedIndex implements Index {
      *  if the term is not in the index.
      */
     public PostingsList getPostings( String token ) {
-	// 
-	//  REPLACE THE STATEMENT BELOW WITH YOUR CODE
-	//
-	return null;
+        return index.get(token);
     }
 
 
@@ -49,10 +49,7 @@ public class HashedIndex implements Index {
      *  Searches the index for postings matching the query.
      */
     public PostingsList search( Query query, int queryType, int rankingType ) {
-	// 
-	//  REPLACE THE STATEMENT BELOW WITH YOUR CODE
-	//
-	return null;
+        return index.get(query.terms.getFirst());
     }
 
 

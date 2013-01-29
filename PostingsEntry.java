@@ -36,7 +36,7 @@ public class PostingsEntry implements Comparable<PostingsEntry>, Serializable {
 	}
     
     public PostingsEntry(int docID, int offset) {
-    	PostingsEntry(docID,0,offset);
+    	this(docID,0.0,offset);
 	}
 }
 
