@@ -46,6 +46,22 @@ public class HashedIndex implements Index {
         return index.get(token);
     }
 
+    private double idf(String term) {
+	int df = index.get(term).size();
+	return Math.log(1000/df); //1000 is the number of docs
+    }
+
+    public void calculateScores() {
+	for (String key : index.keySet()) {
+	    PostingsList postingsList = index.get(key);
+	    for (int i = 0; i < postingsList.size(); i++) {
+		PostingsEntry pe = postingsList.get(i);
+		pe.score = pe.offsets.size() * idf(key); //tf-idf
+	    }
+	}
+
+    }
+
 
     /**
      *  Searches the index for postings matching the query.
