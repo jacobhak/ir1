@@ -9,14 +9,13 @@
 package ir;
 
 import java.io.Serializable;
-
-import com.sun.org.apache.xpath.internal.axes.SelfIteratorNoPredicate;
+import java.util.ArrayList;
 
 public class PostingsEntry implements Comparable<PostingsEntry>, Serializable {
     
     public int docID;
     public double score;
-    public int offset;
+    public ArrayList<Integer> offsets;
 
     /**
      *  PostingsEntries are compared by their score (only relevant 
@@ -29,15 +28,15 @@ public class PostingsEntry implements Comparable<PostingsEntry>, Serializable {
 	return Double.compare( other.score, score );
     }
     
-    public PostingsEntry(int docID, double score, int offset) {
+    public PostingsEntry(int docID, double score, ArrayList<Integer> offsets) {
     	this.docID = docID;
     	this.score = score;
-    	this.offset = offset;
-	}
+    	this.offsets = offsets;
+    }
     
-    public PostingsEntry(int docID, int offset) {
-    	this(docID,0.0,offset);
-	}
+    public PostingsEntry(int docID, ArrayList<Integer> offsets) {
+    	this(docID,0.0,offsets);
+    }
 }
 
     

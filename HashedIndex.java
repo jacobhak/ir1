@@ -53,8 +53,75 @@ public class HashedIndex implements Index {
     public PostingsList search( Query query, int queryType, int rankingType ) {
         ArrayList<PostingsList> postingsLists = new ArrayList<PostingsList>();
         for (String term : query.terms) postingsLists.add(index.get(term));
-        if (postingsLists.size() > 1) return intersection(postingsLists);
-        return postingsLists.get(0);
+	if (queryType == INTERSECTION_QUERY) {
+	    if (postingsLists.size() > 1) return intersection(postingsLists);
+	    return postingsLists.get(0);
+	} else if (queryType == PHRASE_QUERY) {
+	    if (postingsLists.size() > 1) return phrase(postingsLists, query.terms);
+	    return postingsLists.get(0);
+	}
+	return postingsLists.get(0);
+    }
+
+    private PostingsList phrase(ArrayList<PostingsList> postingsLists, LinkedList<String> terms) {
+	System.out.println(terms);
+
+        PostingsList result = new PostingsList();
+        Iterator<PostingsList> iterator = postingsLists.iterator();
+        PostingsList p1 = iterator.next();
+        PostingsList p2 = iterator.next();
+        p1.sortByDocID();
+        p2.sortByDocID();
+        Iterator<PostingsEntry> itP1,itP2;
+        PostingsEntry pe1,pe2;
+	int currentTerm = 0;
+	boolean first = true;
+        while (iterator.hasNext() || first){
+	    if (!first) {
+		p2 = iterator.next();
+                p2.sortByDocID();
+		currentTerm++;
+	    }
+            itP1 = p1.iterator();
+            itP2 = p2.iterator();
+            pe1 = itP1.next();
+            pe2 = itP2.next();
+            while (itP1.hasNext() && itP2.hasNext()){
+
+                if (pe1.docID == pe2.docID){
+		    boolean found = false;
+		    for (int offset1 : pe1.offsets) {
+			for (int offset2 : pe2.offsets) {
+			    if (offset2-offset1 > 0 &&
+				offset2 - offset1 < terms.get(currentTerm).length()+1){
+				result.add(pe2);
+				found = true;
+				break;
+			    }
+			}
+			if (found) break;
+		    }
+		    pe1 = itP1.next();
+		    pe2 = itP2.next();
+                }
+                else if (pe1.docID < pe2.docID){
+		    pe1 = itP1.next();
+		}
+                else {
+		    pe2 = itP2.next();
+		}
+            }
+	    first = false;
+            if (result.size()>0 && iterator.hasNext()) {
+                result.sortByDocID();
+                p1 = result;
+                result = new PostingsList();
+                System.out.println("Starting new intersection. Previous intersection size: "+p1.size());
+
+            }
+        }
+        result.sortByDocID();
+        return result;
     }
 
     private PostingsList intersection(ArrayList<PostingsList> postingsLists) {
@@ -65,16 +132,13 @@ public class HashedIndex implements Index {
         p1.sortByDocID();
         p2.sortByDocID();
         Iterator<PostingsEntry> itP1,itP2;
+	boolean first = true;
         PostingsEntry pe1,pe2;
-        while (iterator.hasNext()){
-            if (result.size()>0) {
-                result.sortByDocID();
-                p1 = result;
-                result = new PostingsList();
-                System.out.println("Starting new intersection. Previous intersection size: "+p1.size());
-                p2 = iterator.next();
-                p2.sortByDocID();
-            }
+        while (iterator.hasNext()||first){
+	    if (!first) {
+		p2 = iterator.next();
+                p2.sortByDocID();	    
+	    }
             itP1 = p1.iterator();
             itP2 = p2.iterator();
             pe1 = itP1.next();
@@ -82,6 +146,7 @@ public class HashedIndex implements Index {
             while (itP1.hasNext() && itP2.hasNext()){
                 if (pe1.docID == pe2.docID) {
                     System.out.println("Adding docID "+pe1.docID);
+
                     result.add(pe1);
                     pe1 = itP1.next();
                     pe2 = itP2.next();
@@ -89,7 +154,14 @@ public class HashedIndex implements Index {
                 else if (pe1.docID < pe2.docID) pe1 = itP1.next();
                 else pe2 = itP2.next();
             }
+	    first = false;
+            if (result.size()>0 && iterator.hasNext()) {
+                result.sortByDocID();
+                p1 = result;
+                result = new PostingsList();
+                System.out.println("Starting new intersection. Previous intersection size: "+p1.size());
 
+            }
         }
         result.sortByDocID();
         return result;

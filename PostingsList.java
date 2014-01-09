@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.ArrayList;
 import java.io.Serializable;
 import ir.PostingsEntry;
 
@@ -39,11 +40,17 @@ public class PostingsList implements Serializable {
 	}
 
 	public void add(int docID, int offset) {
-        for (PostingsEntry pe : list){
-            if (pe.docID == docID) return;
-        }
-		PostingsEntry pe = new PostingsEntry(docID,offset);
-		list.add(pe);
+	    for (PostingsEntry pe : list){
+		if (pe.docID == docID) {
+		    pe.offsets.add(offset);
+		    return;
+		}
+	    }
+	    ArrayList<Integer> offsets = new ArrayList<Integer>();
+	    offsets.add(offset);
+
+	    PostingsEntry pe = new PostingsEntry(docID,offsets);
+	    list.add(pe);
 	}
 
     public void add(PostingsEntry pe) {
