@@ -68,6 +68,17 @@ public class PostingsList implements Serializable {
         });
     }
 
+    public void sortByScore() {
+        Collections.sort(list,new Comparator<PostingsEntry>() {
+            @Override
+            public int compare(PostingsEntry postingsEntry, PostingsEntry postingsEntry2) {
+                if (postingsEntry.score<postingsEntry2.score) return -1;
+                else if (postingsEntry.score == postingsEntry2.score) return 0;
+                else return 1;
+            }
+        });
+    }
+
     public Iterator<PostingsEntry> iterator(){
         return list.iterator();
     }

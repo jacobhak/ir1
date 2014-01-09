@@ -51,14 +51,14 @@ public class HashedIndex implements Index {
 	return Math.log(1000/df); //1000 is the number of docs
     }
 
-    private double[] tfIdf (String term) {
-	PostingsList postingsList = index.get(key);
-	for (int i = 0; i < postingsList.size(); i++) {
-	    PostingsEntry pe = postingsList.get(i);
-	    pe.score = pe.offsets.size() * idf(key); //tf-idf
-	}
+    // private double[] tfIdf (String term) {
+    // 	PostingsList postingsList = index.get(term);
+    // 	for (int i = 0; i < postingsList.size(); i++) {
+    // 	    PostingsEntry pe = postingsList.get(i);
+    // 	    pe.score = pe.offsets.size() * idf(term); //tf-idf
+    // 	}
 
-    }
+    //}
 
     public void calculateScores() {
 	for (String key : index.keySet()) {
@@ -104,7 +104,7 @@ public class HashedIndex implements Index {
 	    if (postingsLists.size() > 1) return intersection(postingsLists);
 	    return postingsLists.get(0);
 	} else if (queryType == RANKED_QUERY) {
-	    ranked(PostingsLists, query);
+	    return ranked(postingsLists, query);
 	} else if (queryType == PHRASE_QUERY) {
 	    if (postingsLists.size() > 1) return phrase(postingsLists, query.terms);
 	    return postingsLists.get(0);
@@ -114,10 +114,42 @@ public class HashedIndex implements Index {
 
     private PostingsList ranked(ArrayList<PostingsList> postingsLists, Query query) {
 	PostingsList result = new PostingsList();
-		// DocID, Term, Term Frequency
+	// DocID, Term, Term Frequency
 	HashMap<Integer,HashMap<String, Integer>> docIndex = buildDocIndex(query);
+	double[] queryTfIdfVector = tfIdf(query);
+	double queryEuclideanLength = queryEuclideanLength(queryTfIdfVector);
+	for (Integer docID : docIndex.keySet()) {
+	    double numerator = 0.0;
+	    double sumOfTfIdfSquared = 0.0;
+	    for (int i = 0; i < query.terms.size(); i++) {
+		Integer tf = docIndex.get(docID).get(query.terms.get(i));
+		if (tf == null) numerator += 0.0;
+		else {
+		    double idf = idf(query.terms.get(i));
+		    numerator += queryTfIdfVector[i] * tf * idf;
+		    sumOfTfIdfSquared += (tf*idf) * (tf*idf);
+		}
+	    }
+	    double denominator = Math.sqrt(sumOfTfIdfSquared) * queryEuclideanLength;
+	    System.out.println("numerator / denominator: " + numerator + " / " + denominator);
+
+	    double score = numerator / denominator;
+	    PostingsEntry pe = new PostingsEntry(docID,score);
+	    result.add(pe);
+	    System.out.println("docId: "+docID + " score: "+score);
+
+	}
+	return result;
     }
 
+    private double queryEuclideanLength(double[] queryTfIdfVector) {
+	double sum = 0.0;
+	for (int i = 0; i < queryTfIdfVector.length; i++) {
+	    sum += queryTfIdfVector[i] * queryTfIdfVector[i];
+	}
+	return Math.sqrt(sum);
+    }
+    
     private HashMap<Integer, HashMap<String, Integer>> buildDocIndex(Query query) {
 	// DocID, Term, Term Frequency
 	HashMap<Integer,HashMap<String, Integer>> docIndex = new HashMap<Integer,HashMap<String, Integer>>();
@@ -128,12 +160,14 @@ public class HashedIndex implements Index {
 		if(docIndex.keySet().contains(pe.docID)){
 		    HashMap<String, Integer> map = docIndex.get(pe.docID);
 		    if (map.keySet().contains(term)) {
-			map.set(term, map.get(term) + pe.offsets.size());
+			map.put(term, map.get(term) + pe.offsets.size());
 		    } else {
-			map.set(term, pe.offsets.size());
+			map.put(term, pe.offsets.size());
 		    }
 		} else {
-		    docIndex.set(docID, new HashMap<String, Integer>().set(term, pe.offsets.size()));
+		    HashMap<String, Integer> map = new HashMap<String, Integer>();
+		    map.put(term, pe.offsets.size());
+		    docIndex.put(pe.docID, map);
 		}
 	    }
 	}	
