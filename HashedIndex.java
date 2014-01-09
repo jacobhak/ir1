@@ -51,6 +51,15 @@ public class HashedIndex implements Index {
 	return Math.log(1000/df); //1000 is the number of docs
     }
 
+    private double[] tfIdf (String term) {
+	PostingsList postingsList = index.get(key);
+	for (int i = 0; i < postingsList.size(); i++) {
+	    PostingsEntry pe = postingsList.get(i);
+	    pe.score = pe.offsets.size() * idf(key); //tf-idf
+	}
+
+    }
+
     public void calculateScores() {
 	for (String key : index.keySet()) {
 	    PostingsList postingsList = index.get(key);
@@ -94,11 +103,51 @@ public class HashedIndex implements Index {
 	if (queryType == INTERSECTION_QUERY) {
 	    if (postingsLists.size() > 1) return intersection(postingsLists);
 	    return postingsLists.get(0);
+	} else if (queryType == RANKED_QUERY) {
+	    ranked(PostingsLists, query);
 	} else if (queryType == PHRASE_QUERY) {
 	    if (postingsLists.size() > 1) return phrase(postingsLists, query.terms);
 	    return postingsLists.get(0);
 	}
 	return postingsLists.get(0);
+    }
+
+    private PostingsList ranked(ArrayList<PostingsList> postingsLists, Query query) {
+	PostingsList result = new PostingsList();
+		// DocID, Term, Term Frequency
+	HashMap<Integer,HashMap<String, Integer>> docIndex = buildDocIndex(query);
+    }
+
+    private HashMap<Integer, HashMap<String, Integer>> buildDocIndex(Query query) {
+	// DocID, Term, Term Frequency
+	HashMap<Integer,HashMap<String, Integer>> docIndex = new HashMap<Integer,HashMap<String, Integer>>();
+	for (String term : query.terms) {
+	    PostingsList postingsList = index.get(term);
+	    for (int i = 0; i < postingsList.size(); i++) {
+		PostingsEntry pe = postingsList.get(i);
+		if(docIndex.keySet().contains(pe.docID)){
+		    HashMap<String, Integer> map = docIndex.get(pe.docID);
+		    if (map.keySet().contains(term)) {
+			map.set(term, map.get(term) + pe.offsets.size());
+		    } else {
+			map.set(term, pe.offsets.size());
+		    }
+		} else {
+		    docIndex.set(docID, new HashMap<String, Integer>().set(term, pe.offsets.size()));
+		}
+	    }
+	}	
+	return docIndex;
+    }
+
+    private PostingsList mergePostingsLists(ArrayList <PostingsList> postingsLists) {
+	PostingsList result = new PostingsList();
+	for (PostingsList postingsList : postingsLists) {
+	    for (int i = 0; i < postingsList.size(); i++) {
+		result.add(postingsList.get(i));
+	    }
+	}
+	return result;
     }
 
     private PostingsList phrase(ArrayList<PostingsList> postingsLists, LinkedList<String> terms) {
