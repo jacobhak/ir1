@@ -62,6 +62,28 @@ public class HashedIndex implements Index {
 
     }
 
+    private int[] tf (Query query) {
+	int[] tfvector = new int[query.terms.size()];
+	for (int i = 0; i < query.terms.size(); i++) {
+	    int tf = 0;
+	    for (String term2 : query.terms) {
+		if (query.terms.get(i) == term2) {
+		    tf++;
+		}
+	    }
+	    tfvector[i] = tf;
+	}
+	return tfvector;
+    }
+
+    private double[] tfIdf (Query query) {
+	int[] tf = tf(query);
+	double[] tfIdfVector = new double[query.terms.size()];
+	for (int i = 0; i < query.terms.size(); i++) {
+	    tfIdfVector[i] = tf[i] * idf(query.terms.get(i));
+	}
+	return tfIdfVector;
+    }
 
     /**
      *  Searches the index for postings matching the query.
