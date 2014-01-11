@@ -160,10 +160,24 @@ public class PageRank{
     void computePagerank( int numberOfDocs ) {
 	double[] xPrim = generateInitialState(numberOfDocs);
 	double[] x = generateZeroes(numberOfDocs);
+	double[][] probability = buildProbabilityMatrix(numberOfDocs);
 	int iterations = 0;
-	while(sumOfDiffs > EPSILON && iterations < MAX_NUMBER_OF_ITERATIONS) {
-	    
+	while(sumOfDiffs(x, xPrim) > EPSILON && iterations < MAX_NUMBER_OF_ITERATIONS) {
+	    x = xPrim;
+	    xPrim = multiplyVectorByMatrix(xPrim, probability);
 	}
+    }
+
+    private double[] multiplyVectorByMatrix(double[] vector, double[][] matrix) {
+	double[] result = new double[vector.length];
+	for (int i = 0; i < vector.length; i++) {
+	    double value = 0.0;
+	    for (int j = 0; j < vector.length; j++) {
+		value += vector[j] * matrix[i][j];
+	    }
+	    result[i] = value;
+	}
+	return result;
     }
 
     private double[][] buildProbabilityMatrix(int numberOfDocs) {
