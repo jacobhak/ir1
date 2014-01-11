@@ -178,9 +178,6 @@ public class PageRank{
 	Map<String, Double> resultMap = buildResultMap(x);
 	TreeMap<String, Double>sortedResult = buildMapSortedByValues(resultMap);
 	printResultMap(sortedResult);
-	Arrays.sort(x);
-	printArray(x);
-
     }
 
     private void printResultMap(TreeMap<String, Double> map){
@@ -268,7 +265,6 @@ public class PageRank{
 		result[i] = generateOutProbabilityVector(link.get(i), out[i], numberOfDocs);
 	    }
 	}
-	printSumOfProbabilities(result);
 	result = multiplyMatrixBy(result, 1-BORED);
 	result = addToMatrix(result, BORED/numberOfDocs);
 	return result;
@@ -295,14 +291,10 @@ public class PageRank{
     private double[] generateOutProbabilityVector(Hashtable<Integer,Boolean> ai,
 						  int nOut, int numberOfDocs) {
 	double[] result = new double[numberOfDocs];
-	if (nOut == 0) {
-	    System.out.println("nOut is zero!");
-	}
 	double probability = 1.0/nOut;
 	for (int i = 0; i < numberOfDocs; i++) {
 	    if (ai.get(i)!= null && ai.get(i) == true) {
 		result[i] = probability;
-		System.out.println("It happened and the prob is: " + probability + " and nOut is: " +nOut);
 	    }
 	    else result[i] = 0.0;
 	}
