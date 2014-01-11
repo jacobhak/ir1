@@ -158,14 +158,96 @@ public class PageRank{
      *   Computes the pagerank of each document.
      */
     void computePagerank( int numberOfDocs ) {
-	//
-	//   YOUR CODE HERE
-	//
+	double[] xPrim = generateInitialState(numberOfDocs);
+	double[] x = generateZeroes(numberOfDocs);
+	int iterations = 0;
+	while(sumOfDiffs > EPSILON && iterations < MAX_NUMBER_OF_ITERATIONS) {
+	    
+	}
+    }
+
+    private double[][] buildProbabilityMatrix(int numberOfDocs) {
+	double[][] result = new double[numberOfDocs][numberOfDocs];
+	for (int i = 0; i < numberOfDocs; i++) {
+	    for (int j = 0; j < numberOfDocs; j++) {
+		if (link.get(i) == null)
+		    result[i] = generate1throughNVector(numberOfDocs);
+		else {
+		    result[i] = generateOutProbabilityVector(link.get(i), out[i], numberOfDocs);
+		}
+	    }
+	}
+	result = multiplyMatrixBy(result, 1-BORED);
+	result = addToMatrix(result, BORED/numberOfDocs);
+	return result;
+    }
+
+    private double[][] multiplyMatrixBy(double[][] matrix, double mult) {
+	for (int i = 0; i < matrix.length; i++) {
+	    for (int j = 0; j < matrix[i].length; i++) {
+		matrix[i][j] = matrix[i][j] * mult;
+	    }
+	}
+	return matrix;
+    }
+
+    private double[][] addMatrixBy(double[][] matrix, double add) {
+	for (int i = 0; i < matrix.length; i++) {
+	    for (int j = 0; j < matrix[i].length; i++) {
+		matrix[i][j] = matrix[i][j] + add;
+	    }
+	}
+	return matrix;	
+    }
+
+    private double[] generateOutProbabilityVector(HashMap<Integer,Boolean> ai,
+						  int nOut, int numberOfDocs) {
+	double[] result = new double[numberOfDocs];
+	double probability = 1/nOut;
+	for (int i = 0; i < numberOfDocs; i++) {
+	    if (ai.get(i)) result[i] = probability;
+	    else result[i] = 0.0;
+	}
+	return result;
+    }
+
+    private double[] generate1throughNVector(int n) {
+	double[] result = new double[n];
+	double value = 1/n;
+	for (int i = 0; i < n; i++) {
+	    result[i] = value;
+	}
+	return result;
+    }
+
+    private double sumOfDiffs(double[] x, double[] xPrim) {
+	double result = 0.0;
+	for (int i = 0; i < x.length; i++) {
+	    result += Math.abs(x[i] - xPrim[i]);
+	}
+	return result;
+    }
+
+    private double[] generateInitialState(int numberOfDocs) {
+	double[] result = new double[numberOfDocs];
+	result[0] = 1.0;
+	for (int i = 1; i < numberOfDocs; i++) {
+	    result[i] = 0.0;
+	}
+	return result;
+    }
+
+    private double[] generateZeroes(int numberOfDocs) {
+	double[] result = new double[numberOfDocs];
+	for (int i = 0; i < numberOfDocs; i++) {
+	    result[i] = 0.0;
+	}
+	return result;
     }
 
 
     /* --------------------------------------------- */
-
+    
 
     public static void main( String[] args ) {
 	if ( args.length != 1 ) {
