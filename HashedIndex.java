@@ -48,7 +48,7 @@ public class HashedIndex implements Index {
 
     private double idf(String term) {
 	int df = index.get(term).size();
-	return Math.log(1000/df); //1000 is the number of docs
+	return Math.log(1002/df); //1000 is the number of docs
     }
 
     // private double[] tfIdf (String term) {
@@ -126,10 +126,14 @@ public class HashedIndex implements Index {
 		if (tf == null) numerator += 0.0;
 		else {
 		    double idf = idf(query.terms.get(i));
+		    System.out.println("qTfIdf: " + queryTfIdfVector[i]+ "dTfIdf: " + (tf*idf));
+
 		    numerator += queryTfIdfVector[i] * tf * idf;
-		    sumOfTfIdfSquared += (tf*idf) * (tf*idf);
+		    sumOfTfIdfSquared += tf * tf;
 		}
 	    }
+	    System.out.println("dLength: " +Math.sqrt(sumOfTfIdfSquared)+ " qLength: "+ queryEuclideanLength);
+
 	    double denominator = Math.sqrt(sumOfTfIdfSquared) * queryEuclideanLength;
 	    System.out.println("numerator / denominator: " + numerator + " / " + denominator);
 
@@ -137,8 +141,10 @@ public class HashedIndex implements Index {
 	    PostingsEntry pe = new PostingsEntry(docID,score);
 	    result.add(pe);
 	    System.out.println("docId: "+docID + " score: "+score);
+	    System.out.println("---------------------");
 
 	}
+	result.sortByScore();
 	return result;
     }
 
