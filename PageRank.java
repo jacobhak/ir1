@@ -167,10 +167,10 @@ public class PageRank{
 	    xPrim = multiplyVectorByMatrix(xPrim, probability);
 	    iterations++;
 	}
-	HashMap<String, Double> resultMap = generateResultMap(result);
+	HashMap<String, Double> resultMap = buildResultMap(result);
     }
 
-    private HashMap<String, Double> generateResultMap(double[] result) {
+    private HashMap<String, Double> buildResultMap(double[] result) {
 	HashMap<String, Double> resultMap = new HashMap<String, Double>();
 	for (int i = 0; i < result.length; i++) {
 	    resultMap.put(docName[i], result[i]);
