@@ -168,6 +168,13 @@ public class PageRank{
 	    iterations++;
 	}
 	HashMap<String, Double> resultMap = buildResultMap(result);
+	
+    }
+
+    private Map<String, Double> buildMapSortedByValues(Map<String, Double> map) {
+	Map<String, Double> result = new TreeMap<String, Double>(new MapValueComparator(map));
+	result.putAll(map);
+	return result;
     }
 
     private HashMap<String, Double> buildResultMap(double[] result) {
@@ -269,7 +276,21 @@ public class PageRank{
 	return result;
     }
 
+    class MapValueComparator implements Comparator<String> {
 
+	Map<String, Double> base;
+	public MapValueComparator(Map<String, Double> base) {
+	    this.base = base;
+	}
+
+	public int compare(String a, String b) {
+	    if (base.get(a) >= base.get(b)) {
+		return 1;
+	    } else {
+		return -1;
+	    } // returning 0 would merge keys
+	}
+    }
     /* --------------------------------------------- */
     
 
