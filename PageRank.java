@@ -191,7 +191,7 @@ public class PageRank{
 	return matrix;
     }
 
-    private double[][] addMatrixBy(double[][] matrix, double add) {
+    private double[][] addToMatrix(double[][] matrix, double add) {
 	for (int i = 0; i < matrix.length; i++) {
 	    for (int j = 0; j < matrix[i].length; i++) {
 		matrix[i][j] = matrix[i][j] + add;
