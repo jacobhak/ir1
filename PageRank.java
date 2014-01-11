@@ -168,13 +168,27 @@ public class PageRank{
 	    iterations++;
 	}
 	Map<String, Double> resultMap = buildResultMap(x);
-	resultMap = buildMapSortedByValues(resultMap);
-	System.out.println(resultMap);
+	TreeMap<String, Double>sortedResult = buildMapSortedByValues(resultMap);
+	printResultMap(sortedResult);
 
     }
 
-    private Map<String, Double> buildMapSortedByValues(Map<String, Double> map) {
-	Map<String, Double> result = new TreeMap<String, Double>(new MapValueComparator(map));
+    private void printResultMap(TreeMap<String, Double> map){
+	Set<Map.Entry<String,Double>> entries = map.entrySet();
+	String key;
+	double value;
+	int i = 1;
+	for (Map.Entry<String, Double> entry : entries) {
+	    key = (String) entry.getKey();
+	    value = entry.getValue();
+	    System.out.println("" + i + ". " + key + " " + value);
+	    if (i == 50) break;
+	    i++;
+	}
+    }
+
+    private TreeMap<String, Double> buildMapSortedByValues(Map<String, Double> map) {
+	TreeMap<String, Double> result = new TreeMap<String, Double>(new MapValueComparator(map));
 	result.putAll(map);
 	return result;
     }
@@ -285,9 +299,9 @@ public class PageRank{
 
 	public int compare(String a, String b) {
 	    if (base.get(a) >= base.get(b)) {
-		return 1;
-	    } else {
 		return -1;
+	    } else {
+		return 1;
 	    } // returning 0 would merge keys
 	}
     }
