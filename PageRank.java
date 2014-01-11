@@ -167,7 +167,7 @@ public class PageRank{
 	double[][] probability = buildProbabilityMatrix(numberOfDocs);
 
 	int iterations = 0;
-	while(Math.abs(sumOfDiffs(x, xPrim)) > EPSILON && iterations < MAX_NUMBER_OF_ITERATIONS) {
+	while(sumOfDiffs(x, xPrim) > EPSILON && iterations < MAX_NUMBER_OF_ITERATIONS) {
 	    x = xPrim;
 	    xPrim = multiplyVectorByMatrix(xPrim, probability);
 	    iterations++;
@@ -178,6 +178,8 @@ public class PageRank{
 	Map<String, Double> resultMap = buildResultMap(x);
 	TreeMap<String, Double>sortedResult = buildMapSortedByValues(resultMap);
 	printResultMap(sortedResult);
+	Arrays.sort(x);
+	printArray(x);
 
     }
 
@@ -224,7 +226,7 @@ public class PageRank{
 	for (int i = 0; i < vector.length; i++) {
 	    double value = 0.0;
 	    for (int j = 0; j < vector.length; j++) {
-		value += vector[j] * matrix[i][j];
+		value += vector[j] * matrix[j][i];
 	    }
 	    result[i] = value;
 	}
@@ -266,7 +268,7 @@ public class PageRank{
 		result[i] = generateOutProbabilityVector(link.get(i), out[i], numberOfDocs);
 	    }
 	}
-	//	printSumOfProbabilities(result);
+	printSumOfProbabilities(result);
 	result = multiplyMatrixBy(result, 1-BORED);
 	result = addToMatrix(result, BORED/numberOfDocs);
 	return result;
@@ -319,16 +321,15 @@ public class PageRank{
     private double sumOfDiffs(double[] x, double[] xPrim) {
 	double result = 0.0;
 	for (int i = 0; i < x.length; i++) {
-	    result += x[i] - xPrim[i];
+	    result += Math.abs(x[i] - xPrim[i]);
 	}
 	return result;
     }
 
     private double[] generateInitialState(int numberOfDocs) {
 	double[] result = new double[numberOfDocs];
-	result[0] = 0.5;
-	result[1] = 0.5;
-	for (int i = 2; i < numberOfDocs; i++) {
+	result[0] = 1.0;
+	for (int i = 1; i < numberOfDocs; i++) {
 	    result[i] = 0.0;
 	}
 	return result;
