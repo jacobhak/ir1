@@ -167,8 +167,10 @@ public class PageRank{
 	    xPrim = multiplyVectorByMatrix(xPrim, probability);
 	    iterations++;
 	}
-	HashMap<String, Double> resultMap = buildResultMap(result);
-	
+	Map<String, Double> resultMap = buildResultMap(x);
+	resultMap = buildMapSortedByValues(resultMap);
+	System.out.println(resultMap);
+
     }
 
     private Map<String, Double> buildMapSortedByValues(Map<String, Double> map) {
@@ -231,7 +233,7 @@ public class PageRank{
 	return matrix;	
     }
 
-    private double[] generateOutProbabilityVector(HashMap<Integer,Boolean> ai,
+    private double[] generateOutProbabilityVector(Hashtable<Integer,Boolean> ai,
 						  int nOut, int numberOfDocs) {
 	double[] result = new double[numberOfDocs];
 	double probability = 1/nOut;
