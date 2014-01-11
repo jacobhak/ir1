@@ -72,8 +72,12 @@ public class PageRank{
 
 
     public PageRank( String filename ) {
-	int noOfDocs = readDocs( filename );
-	computePagerank( noOfDocs );
+	if (filename == null) {
+	    runTests();
+	} else{
+	    int noOfDocs = readDocs( filename );
+	    computePagerank( noOfDocs );
+	}
     }
 
 
@@ -161,11 +165,15 @@ public class PageRank{
 	double[] xPrim = generateInitialState(numberOfDocs);
 	double[] x = generateZeroes(numberOfDocs);
 	double[][] probability = buildProbabilityMatrix(numberOfDocs);
+
 	int iterations = 0;
-	while(sumOfDiffs(x, xPrim) > EPSILON && iterations < MAX_NUMBER_OF_ITERATIONS) {
+	while(Math.abs(sumOfDiffs(x, xPrim)) > EPSILON && iterations < MAX_NUMBER_OF_ITERATIONS) {
 	    x = xPrim;
 	    xPrim = multiplyVectorByMatrix(xPrim, probability);
 	    iterations++;
+	    System.out.println("it: " +iterations);
+	    System.out.println(x[0] + ", " + x[1] + ", " + x[2] + ", "+ x[3]);
+
 	}
 	Map<String, Double> resultMap = buildResultMap(x);
 	TreeMap<String, Double>sortedResult = buildMapSortedByValues(resultMap);
@@ -184,6 +192,16 @@ public class PageRank{
 	    System.out.println("" + i + ". " + key + " " + value);
 	    if (i == 50) break;
 	    i++;
+	}
+    }
+
+    private void printSumOfProbabilities(double[][] matrix) {
+	for (int i = 0; i < matrix.length; i++) {
+	    double value = 0.0;
+	    for (int j = 0; j < matrix[i].length; j++) {
+		value += matrix[i][j];
+	    }
+	    System.out.println(value);
 	}
     }
 
@@ -213,15 +231,42 @@ public class PageRank{
 	return result;
     }
 
+    private void testMatrixMultiplication(){
+	double[] v = {0.0, 0.1, 0.3};
+	double[][] m = {{1.0, 1.0, 1.0}, {2.0, 2.0, 2.0}, {3.0, 3.0, 3.0}};
+	double[] expected = {0.4, 0.8, 1.2};
+	double[] result = multiplyVectorByMatrix(v, m);
+	if (result.equals(expected)) {
+	    System.out.println("JODU");
+	} else {
+	    System.out.println("FAIL");
+	    printArray(result);
+	    printArray(expected);
+	}
+
+    }
+
+    private void printArray(double[] array) {
+	String str = "[";
+	for(double v : array){
+	    str += v;
+	    str += ", ";
+	}
+	str+= "]";
+	System.out.println(str);
+    }
+
     private double[][] buildProbabilityMatrix(int numberOfDocs) {
 	double[][] result = new double[numberOfDocs][numberOfDocs];
 	for (int i = 0; i < numberOfDocs; i++) {
-	    if (link.get(i) == null)
+	    if (link.get(i) == null){
 		result[i] = generate1throughNVector(numberOfDocs);
+	    }
 	    else {
 		result[i] = generateOutProbabilityVector(link.get(i), out[i], numberOfDocs);
 	    }
 	}
+	//	printSumOfProbabilities(result);
 	result = multiplyMatrixBy(result, 1-BORED);
 	result = addToMatrix(result, BORED/numberOfDocs);
 	return result;
@@ -248,9 +293,15 @@ public class PageRank{
     private double[] generateOutProbabilityVector(Hashtable<Integer,Boolean> ai,
 						  int nOut, int numberOfDocs) {
 	double[] result = new double[numberOfDocs];
-	double probability = 1/nOut;
+	if (nOut == 0) {
+	    System.out.println("nOut is zero!");
+	}
+	double probability = 1.0/nOut;
 	for (int i = 0; i < numberOfDocs; i++) {
-	    if (ai.get(i)!= null) result[i] = probability;
+	    if (ai.get(i)!= null && ai.get(i) == true) {
+		result[i] = probability;
+		System.out.println("It happened and the prob is: " + probability + " and nOut is: " +nOut);
+	    }
 	    else result[i] = 0.0;
 	}
 	return result;
@@ -258,7 +309,7 @@ public class PageRank{
 
     private double[] generate1throughNVector(int n) {
 	double[] result = new double[n];
-	double value = 1/n;
+	double value = 1.0/n;
 	for (int i = 0; i < n; i++) {
 	    result[i] = value;
 	}
@@ -268,15 +319,16 @@ public class PageRank{
     private double sumOfDiffs(double[] x, double[] xPrim) {
 	double result = 0.0;
 	for (int i = 0; i < x.length; i++) {
-	    result += Math.abs(x[i] - xPrim[i]);
+	    result += x[i] - xPrim[i];
 	}
 	return result;
     }
 
     private double[] generateInitialState(int numberOfDocs) {
 	double[] result = new double[numberOfDocs];
-	result[0] = 1.0;
-	for (int i = 1; i < numberOfDocs; i++) {
+	result[0] = 0.5;
+	result[1] = 0.5;
+	for (int i = 2; i < numberOfDocs; i++) {
 	    result[i] = 0.0;
 	}
 	return result;
@@ -310,10 +362,15 @@ public class PageRank{
 
     public static void main( String[] args ) {
 	if ( args.length != 1 ) {
-	    System.err.println( "Please give the name of the link file" );
+	    new PageRank(null); // Runs tests.
 	}
 	else {
 	    new PageRank( args[0] );
 	}
     }
+
+    private void runTests() {
+	testMatrixMultiplication();
+    }
 }
+
