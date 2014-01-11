@@ -202,12 +202,10 @@ public class PageRank{
     private double[][] buildProbabilityMatrix(int numberOfDocs) {
 	double[][] result = new double[numberOfDocs][numberOfDocs];
 	for (int i = 0; i < numberOfDocs; i++) {
-	    for (int j = 0; j < numberOfDocs; j++) {
-		if (link.get(i) == null)
-		    result[i] = generate1throughNVector(numberOfDocs);
-		else {
-		    result[i] = generateOutProbabilityVector(link.get(i), out[i], numberOfDocs);
-		}
+	    if (link.get(i) == null)
+		result[i] = generate1throughNVector(numberOfDocs);
+	    else {
+		result[i] = generateOutProbabilityVector(link.get(i), out[i], numberOfDocs);
 	    }
 	}
 	result = multiplyMatrixBy(result, 1-BORED);
@@ -217,7 +215,7 @@ public class PageRank{
 
     private double[][] multiplyMatrixBy(double[][] matrix, double mult) {
 	for (int i = 0; i < matrix.length; i++) {
-	    for (int j = 0; j < matrix[i].length; i++) {
+	    for (int j = 0; j < matrix[i].length; j++) {
 		matrix[i][j] = matrix[i][j] * mult;
 	    }
 	}
@@ -226,7 +224,7 @@ public class PageRank{
 
     private double[][] addToMatrix(double[][] matrix, double add) {
 	for (int i = 0; i < matrix.length; i++) {
-	    for (int j = 0; j < matrix[i].length; i++) {
+	    for (int j = 0; j < matrix[i].length; j++) {
 		matrix[i][j] = matrix[i][j] + add;
 	    }
 	}
@@ -238,7 +236,7 @@ public class PageRank{
 	double[] result = new double[numberOfDocs];
 	double probability = 1/nOut;
 	for (int i = 0; i < numberOfDocs; i++) {
-	    if (ai.get(i)) result[i] = probability;
+	    if (ai.get(i)!= null) result[i] = probability;
 	    else result[i] = 0.0;
 	}
 	return result;
