@@ -165,7 +165,17 @@ public class PageRank{
 	while(sumOfDiffs(x, xPrim) > EPSILON && iterations < MAX_NUMBER_OF_ITERATIONS) {
 	    x = xPrim;
 	    xPrim = multiplyVectorByMatrix(xPrim, probability);
+	    iterations++;
 	}
+	HashMap<String, Double> resultMap = generateResultMap(result);
+    }
+
+    private HashMap<String, Double> generateResultMap(double[] result) {
+	HashMap<String, Double> resultMap = new HashMap<String, Double>();
+	for (int i = 0; i < result.length; i++) {
+	    resultMap.put(docName[i], result[i]);
+	}
+	return resultMap;
     }
 
     private double[] multiplyVectorByMatrix(double[] vector, double[][] matrix) {
