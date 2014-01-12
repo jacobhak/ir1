@@ -128,7 +128,7 @@ public class HashedIndex implements Index {
 	PostingsList result = new PostingsList();
 	docIndex = buildDocIndex();
 	double[] queryTfIdfVector = tfIdf(query);
-	double queryEuclideanLength = queryEuclideanLength(queryTfIdfVector);
+	double queryEuclideanLength = euclideanLength(queryTfIdfVector);
 	for (Integer docID : docIndex.keySet()) {
 	    double numerator = 0.0;
 	    for (int i = 0; i < query.terms.size(); i++) {
@@ -137,13 +137,13 @@ public class HashedIndex implements Index {
 		else {
 		    double idf = idf(query.terms.get(i));
 		    double weight = queryTfIdfVector[i] * tf * idf;
-		    if (query.weights.get(i) != null) {
+		    if (query.weights.get(i) != null) { //For relevance feedback
 			weight = weight * query.weights.get(i);
 		    }
 		    numerator += weight;
 		}
 	    }
-	    double denominator = queryEuclideanLength(tfIdfVector(docIndex.get(docID)))* queryEuclideanLength;
+	    double denominator = euclideanLength(tfIdfVector(docIndex.get(docID)))* queryEuclideanLength;
 	    double score = numerator / denominator;
 	    if (score != 0.0) {
 		PostingsEntry pe = new PostingsEntry(docID,score);
@@ -154,7 +154,7 @@ public class HashedIndex implements Index {
 	return result;
     }
 
-    private double queryEuclideanLength(double[] queryTfIdfVector) {
+    private double euclideanLength(double[] queryTfIdfVector) {
 	double sum = 0.0;
 	for (int i = 0; i < queryTfIdfVector.length; i++) {
 	    sum += queryTfIdfVector[i] * queryTfIdfVector[i];
