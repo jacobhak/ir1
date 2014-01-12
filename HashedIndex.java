@@ -126,7 +126,7 @@ public class HashedIndex implements Index {
 
     private PostingsList ranked(ArrayList<PostingsList> postingsLists, Query query) {
 	PostingsList result = new PostingsList();
-	docIndex = buildDocIndex(query);
+	docIndex = buildDocIndex();
 	double[] queryTfIdfVector = tfIdf(query);
 	double queryEuclideanLength = queryEuclideanLength(queryTfIdfVector);
 	for (Integer docID : docIndex.keySet()) {
@@ -162,7 +162,7 @@ public class HashedIndex implements Index {
 	return Math.sqrt(sum);
     }
     
-    private HashMap<Integer, HashMap<String, Integer>> buildDocIndex(Query query) {
+    private HashMap<Integer, HashMap<String, Integer>> buildDocIndex() {
 	// DocID, Term, Term Frequency
 	HashMap<Integer,HashMap<String, Integer>> docIndex = new HashMap<Integer,HashMap<String, Integer>>();
 	for (String term : index.keySet()) {
