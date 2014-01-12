@@ -136,7 +136,6 @@ public class HashedIndex implements Index {
 		if (tf == null) numerator += 0.0;
 		else {
 		    double idf = idf(query.terms.get(i));
-		    System.out.println("qTfIdf: " + queryTfIdfVector[i]+ "dTfIdf: " + (tf*idf));
 		    double weight = queryTfIdfVector[i] * tf * idf;
 		    if (query.weights.get(i) != null) {
 			weight = weight * query.weights.get(i);
@@ -145,8 +144,6 @@ public class HashedIndex implements Index {
 		}
 	    }
 	    double denominator = queryEuclideanLength(tfIdfVector(docIndex.get(docID)))* queryEuclideanLength;
-	    System.out.println("numerator / denominator: " + numerator + " / " + denominator);
-
 	    double score = numerator / denominator;
 	    if (score != 0.0) {
 		PostingsEntry pe = new PostingsEntry(docID,score);
@@ -168,7 +165,6 @@ public class HashedIndex implements Index {
     private HashMap<Integer, HashMap<String, Integer>> buildDocIndex(Query query) {
 	// DocID, Term, Term Frequency
 	HashMap<Integer,HashMap<String, Integer>> docIndex = new HashMap<Integer,HashMap<String, Integer>>();
-	
 	for (String term : index.keySet()) {
 	    PostingsList postingsList = index.get(term);
 	    for (int i = 0; i < postingsList.size(); i++) {
