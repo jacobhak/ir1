@@ -22,6 +22,8 @@ public class HashedIndex implements Index {
 
     /** The index as a hashtable. */
     private HashMap<String,PostingsList> index = new HashMap<String,PostingsList>();
+    // DocID, Term, Term Frequency
+    public HashMap<Integer,HashMap<String, Integer>> docIndex;
 
 
     /**
@@ -85,7 +87,7 @@ public class HashedIndex implements Index {
 	return tfvector;
     }
 
-    private double[] tfIdf (Query query) {
+    public double[] tfIdf (Query query) {
 	int[] tf = tf(query);
 	double[] tfIdfVector = new double[query.terms.size()];
 	for (int i = 0; i < query.terms.size(); i++) {
@@ -112,7 +114,7 @@ public class HashedIndex implements Index {
 	return postingsLists.get(0);
     }
 
-    private double[] tfIdfVector(HashMap<String, Integer> document) {
+    public double[] tfIdfVector(HashMap<String, Integer> document) {
 	double[] result = new double[document.keySet().size()];
 	int i = 0;
 	for (String term : document.keySet()) {
@@ -124,8 +126,7 @@ public class HashedIndex implements Index {
 
     private PostingsList ranked(ArrayList<PostingsList> postingsLists, Query query) {
 	PostingsList result = new PostingsList();
-	// DocID, Term, Term Frequency
-	HashMap<Integer,HashMap<String, Integer>> docIndex = buildDocIndex(query);
+	docIndex = buildDocIndex(query);
 	double[] queryTfIdfVector = tfIdf(query);
 	double queryEuclideanLength = queryEuclideanLength(queryTfIdfVector);
 	for (Integer docID : docIndex.keySet()) {
@@ -136,7 +137,11 @@ public class HashedIndex implements Index {
 		else {
 		    double idf = idf(query.terms.get(i));
 		    System.out.println("qTfIdf: " + queryTfIdfVector[i]+ "dTfIdf: " + (tf*idf));
-		    numerator += queryTfIdfVector[i] * tf * idf;
+		    double weight = queryTfIdfVector[i] * tf * idf;
+		    if (query.weights.get(i) != null) {
+			weight = weight * query.weights.get(i);
+		    }
+		    numerator += weight;
 		}
 	    }
 	    double denominator = queryEuclideanLength(tfIdfVector(docIndex.get(docID)))* queryEuclideanLength;
