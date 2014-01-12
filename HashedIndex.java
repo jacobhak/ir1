@@ -112,6 +112,16 @@ public class HashedIndex implements Index {
 	return postingsLists.get(0);
     }
 
+    private double[] tfIdfVector(HashMap<String, Integer> document) {
+	double[] result = new double[document.keySet().size()];
+	int i = 0;
+	for (String term : document.keySet()) {
+	    result[i] = document.get(term) * idf(term);
+	    i++;
+	}
+	return result;
+    }
+
     private PostingsList ranked(ArrayList<PostingsList> postingsLists, Query query) {
 	PostingsList result = new PostingsList();
 	// DocID, Term, Term Frequency
@@ -120,29 +130,23 @@ public class HashedIndex implements Index {
 	double queryEuclideanLength = queryEuclideanLength(queryTfIdfVector);
 	for (Integer docID : docIndex.keySet()) {
 	    double numerator = 0.0;
-	    double sumOfTfIdfSquared = 0.0;
 	    for (int i = 0; i < query.terms.size(); i++) {
 		Integer tf = docIndex.get(docID).get(query.terms.get(i));
 		if (tf == null) numerator += 0.0;
 		else {
 		    double idf = idf(query.terms.get(i));
 		    System.out.println("qTfIdf: " + queryTfIdfVector[i]+ "dTfIdf: " + (tf*idf));
-
 		    numerator += queryTfIdfVector[i] * tf * idf;
-		    sumOfTfIdfSquared += tf * tf;
 		}
 	    }
-	    System.out.println("dLength: " +Math.sqrt(sumOfTfIdfSquared)+ " qLength: "+ queryEuclideanLength);
-
-	    double denominator = Math.sqrt(sumOfTfIdfSquared) * queryEuclideanLength;
+	    double denominator = queryEuclideanLength(tfIdfVector(docIndex.get(docID)))* queryEuclideanLength;
 	    System.out.println("numerator / denominator: " + numerator + " / " + denominator);
 
 	    double score = numerator / denominator;
-	    PostingsEntry pe = new PostingsEntry(docID,score);
-	    result.add(pe);
-	    System.out.println("docId: "+docID + " score: "+score);
-	    System.out.println("---------------------");
-
+	    if (score != 0.0) {
+		PostingsEntry pe = new PostingsEntry(docID,score);
+		result.add(pe);
+	    }
 	}
 	result.sortByScore();
 	return result;
@@ -159,7 +163,8 @@ public class HashedIndex implements Index {
     private HashMap<Integer, HashMap<String, Integer>> buildDocIndex(Query query) {
 	// DocID, Term, Term Frequency
 	HashMap<Integer,HashMap<String, Integer>> docIndex = new HashMap<Integer,HashMap<String, Integer>>();
-	for (String term : query.terms) {
+	
+	for (String term : index.keySet()) {
 	    PostingsList postingsList = index.get(term);
 	    for (int i = 0; i < postingsList.size(); i++) {
 		PostingsEntry pe = postingsList.get(i);
